@@ -24,7 +24,7 @@ def blink1_color(msec,r,g,b):
         blink1.close()
     except:
        print("no blink1 found")
-    
+
 #def create_menu_item(menu, label, func):
 #    item = wx.MenuItem(menu, wx.NewId(), label)
 #    menu.Bind(wx.EVT_MENU, func, item)
@@ -36,7 +36,7 @@ def create_menu_item(menu, label, func):
     menu.Bind(wx.EVT_MENU, func, id=item.GetId())
     menu.Append(item)
     return item
-        
+
 class TaskBarIcon(wx.adv.TaskBarIcon):
     def __init__(self, frame):
         self.frame = frame
@@ -57,16 +57,16 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         icon = wx.Icon(path)
         self.SetIcon(icon, TRAY_TOOLTIP)
 
-    def on_left_down(self, event):      
+    def on_left_down(self, event):
         print ('Tray icon was left-clicked.')
 
     def on_white(self, event):
         print ('Hello, world!')
-        blink1_color(100, 255,0,255)
+        blink1_color(100, 255,255,255)
 
     def on_purple(self, event):
         print ('BLOOOP')
-        blink1_color(100, 255,255,255)
+        blink1_color(100, 255,0,255)
 
     def on_exit(self, event):
         wx.CallAfter(self.Destroy)
@@ -76,22 +76,66 @@ class MyFrame(wx.Frame):
     """ We simply derive a new class of Frame. """
     def __init__(self):
         super().__init__(parent=None, title='blink(1) toy')
-        panel = wx.Panel(self)        
-        my_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.text_ctrl = wx.TextCtrl(panel)
-        my_sizer.Add(self.text_ctrl, 0, wx.ALL | wx.EXPAND, 5)        
-        my_btn = wx.Button(panel, label='Press Me')
-        my_btn.Bind(wx.EVT_BUTTON, self.on_press)
-        my_sizer.Add(my_btn, 0, wx.ALL | wx.CENTER, 5)        
-        panel.SetSizer(my_sizer)        
+        panel = wx.Panel(self)
+        self.Bind(wx.EVT_CLOSE, self.closewindow)
+
+        topSizer = wx.BoxSizer(wx.VERTICAL)
+        inputOneSizer = wx.BoxSizer(wx.HORIZONTAL)
+        blBtnSizer = wx.BoxSizer(wx.HORIZONTAL)
+        btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+#        labelOne = wx.StaticText(panel, wx.ID_ANY, 'Input 1')
+#        inputTxtOne = wx.TextCtrl(panel, wx.ID_ANY, '')
+
+        okBtn = wx.Button(panel, wx.ID_ANY, 'OK')
+        cancelBtn = wx.Button(panel, wx.ID_ANY, 'Cancel')
+
+        redBtn = wx.Button(panel, wx.ID_ANY, 'red')
+        grnBtn = wx.Button(panel, wx.ID_ANY, 'grn')
+        bluBtn = wx.Button(panel, wx.ID_ANY, 'blu')
+        self.Bind(wx.EVT_BUTTON, self.onBlinkButton, redBtn)
+        self.Bind(wx.EVT_BUTTON, self.onBlinkButton, grnBtn)
+        self.Bind(wx.EVT_BUTTON, self.onBlinkButton, bluBtn)
+
+#        inputOneSizer.Add(labelOne, 0, wx.ALL, 5)
+#        inputOneSizer.Add(inputTxtOne, 0, wx.ALL|wx.EXPAND, 5)
+
+        blBtnSizer.Add(redBtn, 0, wx.ALL, 5)
+        blBtnSizer.Add(grnBtn, 0, wx.ALL, 5)
+        blBtnSizer.Add(bluBtn, 0, wx.ALL, 5)
+
+        btnSizer.Add(okBtn, 0, wx.ALL, 5)
+        btnSizer.Add(cancelBtn, 0, wx.ALL, 5)
+
+        # topSizer.Add(inputOneSizer, 0, wx.ALL|wx.EXPAND, 5)
+        topSizer.Add(wx.StaticLine(panel), 0, wx.ALL|wx.EXPAND, 5)
+        topSizer.Add(blBtnSizer, 0, wx.ALL|wx.EXPAND, 5)
+        topSizer.Add(wx.StaticLine(panel), 0, wx.ALL|wx.EXPAND, 5)
+        topSizer.Add(btnSizer, 0, wx.ALL|wx.CENTER, 5)
+
+        panel.SetSizer(topSizer)
+        topSizer.Fit(self)
+
+        # panel.SetSizer(bsizer)
         self.Show()
-        
+
+    def onBlinkButton(self,event):
+#        print('event', event )
+        obj = event.GetEventObject()
+        print(obj.GetLabel())
+        lbl = obj.GetLabel()
+        if lbl == 'red' :
+            print('reeed')
+            blink1_color(100, 255,0,0 )
+        elif lbl == 'grn':
+            print('greeen')
+            blink1_color(100, 0,255,0)
+
+    def closewindow(self,event):
+        self.Destroy()
+
     def on_press(self, event):
-        value = self.text_ctrl.GetValue()
-        if not value:
-            print("You didn't enter anything!")
-            return
-        print(f'You typed: "{value}"')
+        print(f'You clicked')
 
 class App(wx.App):
     def OnInit(self):
@@ -101,7 +145,7 @@ class App(wx.App):
         #self.imgsDir = 'hello'
         print(f'imgs_dir:{self.GetImgsDir()}')
         return True
-    
+
     def OnExit(self):
         blink1_color(100,0,0,0)
         return True
@@ -110,7 +154,7 @@ class App(wx.App):
         installDir = os.path.split(os.path.abspath(sys.argv[0]))[0]
         imgsDir = os.path.join(installDir, "imgs")
         return imgsDir
-        
+
 def main():
     app = App(False)
     app.MainLoop()
@@ -118,5 +162,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    
